@@ -8,4 +8,6 @@ They are useful for when we find machines on internal networks which are not run
 
 In this section, we focus on *inherent* vulnerabilities in windows 🪟 and linux 🐧
 
-😈
+---
+
+😈 the enemy knows the system 😈
