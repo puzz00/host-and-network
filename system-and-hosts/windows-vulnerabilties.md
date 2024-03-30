@@ -288,3 +288,7 @@ run
 ## Conclusion
 
 There are lots of vulnerabilities in native Windows services as we have seen above. It is worth remembering this and checking for them when we are testing a Windows system.
+
+---
+
+> the enemy knows the system
