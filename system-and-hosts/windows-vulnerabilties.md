@@ -106,7 +106,7 @@ If we find valid credentials for smb, we can enumerate the host's netbios inform
 nmap --script=smb-enum-users -p 445 10.130.40.70 --script-args smbuser=administrator,smbpass=password
 ```
 
-## Null Sessions
+### Null Sessions
 
 We can use `smbmap` to check for null session attacks: `sudo smbmap -H 10.2.2.8` We can then enumerate the shares if our null session attack works: `sudo smbmap -H 10.2.2.8 -R secret` the -R flag recursively lists files and directories in the specified share. We can download resources using: `sudo smbmap -H 10.2.2.8 --download "secrets\passes.txt"`
 
