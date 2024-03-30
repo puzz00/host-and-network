@@ -111,4 +111,6 @@ Msfconsole also has a module we can use to automatically exploit unquoted servic
 
 Once we land on a machine, finding a way to elevate our privileges is essential. It depends on thorough enumeration and perseverance.
 
+---
+
 > water shapes its course according to the nature of the ground over which it flows - the soldier works out his victory in relation to the foe whom he is facing
