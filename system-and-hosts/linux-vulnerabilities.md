@@ -91,3 +91,58 @@ run
 
 This will (hopefully) give us a meterpreter session on the target system.
 
+## Exploiting FTP
+
+It is worth knowing how to exploit File Transfer Protocol becuase it is used on lots of linux systems.
+
+FTP is used to facilitate the sharing of data between machines - typically this is between a client and a web-server - an example would be a person transfering their website files to their web-server using FTP.
+
+### Anonymous Access
+
+FTP is protected by username:password authentication and by default this is enabled. It is possible to allow *anonymous* access to a system using FTP but this is not normally found. Still, we can test for anonymous FTP access using: `sudo ftp 192.168.56.101` and then using the username `anonymous` with a blank password when prompted to input them.
+
+>[!NOTE]
+>Sometimes we will need to use the *passive* mode to connect to FTP - we can use `sudo ftp -p 192.168.56.101` to do so.
+
+### Brute Force Attacks
+
+Typically we do not find *anonymous* access to a server via FTP since it will be set up with username:password authentication.
+
+We can therefore attempt a brute-force attack against FTP.
+
+>[!TIP]
+>Password spraying attacks are better than dictionary brute-force attacks
+
+We can use different tools such as *hydra* and *patator* to perform these attacks. Hydra is a good tool and we can launch a dictionary brute-force attack against FTP with it using:
+
+```bash
+sudo hydra -L users.txt -P passes.txt ftp://10.10.187.241:2121 -t 4
+```
+
+>[!NOTE]
+>In the above example the port is specified as `2121` since FTP can be configured to run on any port not just its default of `21` - always check all ports when port scanning
+
+We can also launch a *password spraying* attack using hydra like so:
+
+```bash
+sudo hydra hydra -L users.txt -p Password1 ftp://10.10.187.241:2121 -t 4
+```
+
+>[!CAUTION]
+>Running *hydra* with the default number of threads - 16 - can crash FTP servers - this is why we like to slow things down using `-t 4`
+
+### Enumeration
+
+If we manage to get access to a server via FTP, we can enumerate it using common system commands such as `dir` and `cd`
+
+If we want to download a file we can use: `get confidential.txt` and if we want to download all the resources in a directory we can use `mget *` This makes use of `mget` which lets us download *multiple* files and the `*` wildcard which specifies *all* files.
+
+>[!NOTE]
+>It is best to be in the *binary* transfer mode when downloading data using FTP - we can enter this mode using `binary`
+
+### Version Exploits
+
+Like other services, it is also possible to exploit vulnerabilities in specific versions of FTP. In order to do this, we will need to enumerate the version and then search for any vulnerabilities along with exploit code for it.
+
+We can research using search engines or *searchsploit*.
+
