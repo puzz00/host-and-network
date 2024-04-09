@@ -62,3 +62,62 @@ When we look at the crontab using `cat /etc/crontab` we will see the `PATH` envi
 >[!NOTE]
 >For extra info on how scheduled tasks work on linux systems, you could take a :eyes: at my work on [cron jobs explained](https://github.com/zigzaga00/linux-notes/blob/main/linux-notes.md#automating-and-scheduling-tasks-using-cron-jobs)
 
+## SUDO Shell Escapes
+
+On a linux system, there are different types of user. There is a root user who has the highest privileges and therefore complete control of the system. This user is given the user id of 0. There are regular users who do not have the same privs as the root user, but they can be given elevated privs on a temporary basis using the `sudo` command
+
+The `sudo` command stands for super user do and lets a user execute a command with elevated privileges on a temporary basis. It usually requires authentication with the user's own password.
+
+We can allow a user to use `sudo` by adding them to the `/etc/sudoers` file. We do not edit this with text editors directly because if we mess it up it could lead to big problems. We therefore use `visudo` to edit it. This will check for syntax errors before saving the changes.
+
+To add sudo privileges for specific users or groups to `/etc/sudoers` we can use a command such as: `mmouse ALL=(ALL:ALL) ALL` This command relates to the user `mmouse`. We can use a `%` prefix to specify a group like so: `%mmouse ALL=(ALL:ALL) ALL`
+
+>[!NOTE]
+>The syntax used above is explained in the next section which is about `/etc/sudoers`
+
+The *sudo group* can use `sudo` - this illustrates how we can use group memberships to more finely control privileges. We could add `mmouse` to the *sudo group* like so: `usermod -aG sudo mmouse`
+
+>[!TIP]
+>When enumerating a box, keep your :eyes: open for the members of the `wheel` group as this is another name for the `sudo` group
+
+If we have full sudo rights, we can open an elevated shell session using: `sudo -s` or `sudo /bin/bash` We can kill a sudo session using `sudo -k`
+
+>[!NOTE]
+>A sudo session will time out after fifteen minutes by default
+
+We can switch into different users without needing to specify their password using: `sudo -u dduck /bin/bash` or `sudo -u dduck -s`
+
+>[!IMPORTANT]
+>We do not have to start a bash session as the user - *we can specify any command* to run as them
+
+### /etc/sudoers
+
+We can break down the entry: `mmouse ALL=(ALL:ALL) ALL` like so...
+
+The *first* field specifies the *user* which the rule should be applied to.
+
+The *second* field specifies the *hostname* that the rule applies to - usually this is specified as `ALL` for *all* hosts.
+
+The *third* field specifies *the users mmouse can sudo into*.
+
+The *fourth* field specifies *the groups mmouse can sudo into*.
+
+The *fifth* field specifies the *command or commands which can be executed* using sudo
+
+We could add `NOPASSWD` to the entry which means that the user will not need to enter their password when they want to elevate their privileges to do whatever has been specified in the rest of the entry. We could do this using: `mmouse ALL(ALL:ALL) NOPASSWD: ALL`
+
+If we omit the `(ALL:ALL)` *user* and *group* specification then the user will only be able to sudo into the root user.
+
+>[!TIP]
+>We can specify specific commands in the entry like so: `dduck ALL=(ALL:ALL) NOPASSWD: /usr/bin/find`
+
+### Finding SUDO Shell Escapes
+
+One of the first things we can do when we land on a linux box is to run `sudo -l` which will list any commands which the current user can run as the root user *via the sudo command*.
+
+### Exploiting SUDO Shell Escapes
+
+If we see that the current user can run commands as the root user using `sudo` then it makes sense for us to check if there is a way to abuse this to escape the shell and open a root shell. A good resource for this is [gtfobins](https://gtfobins.github.io) which has lots of information regarding shell escapes for different binaries.
+
+It may well be that we find a custom shell script or binary which can be executed as the root user via the `sudo` command. If this is the case, it is a good idea to have a look at the script or binary in order to understand how it works as it might be we can exploit it to gain a root shell. We could also check file permissions and the path as we might be able to hijack the path or replace or edit the script.
+
