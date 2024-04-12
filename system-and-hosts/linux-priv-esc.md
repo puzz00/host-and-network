@@ -121,3 +121,51 @@ If we see that the current user can run commands as the root user using `sudo` t
 
 It may well be that we find a custom shell script or binary which can be executed as the root user via the `sudo` command. If this is the case, it is a good idea to have a look at the script or binary in order to understand how it works as it might be we can exploit it to gain a root shell. We could also check file permissions and the path as we might be able to hijack the path or replace or edit the script.
 
+## SUID Binary Exploits
+
+### File Permissions on Linux
+
+File permissions let us control who can read, write and execute files. There are three levels of permission:
+
+- Owner (u)
+- Group (g)
+- Others (o)
+
+We can use numbers to specify permissions.
+
+Read access is `4` - read contents of files or list directories. Write access is `2` - modify files or create and delete files in directories. Execute permission is `1` - run a file or change into a directory.
+
+We can use the `chmod` command to change file permissions using letters or numbers. We can use `+` to add and `-` to remove.
+
+When using numbers, the first digit is for the owner, the second digit is for the group and the third digit is for others. We add together the numbers for the permissions we want to grant. `7` means read, write and execute rights as 4 + 2 + 1 = 7
+
+We can change the owner and group of a file using the `chown` command. We need to specify the *owner:group*
+
+### SUID and GUID
+
+Some binaries need to operate with elevated privileges. An example of this is `sudo` - this binary lets users run certain or all commands with elevated privileges.
+
+The `sudo` binary is owned by root and has the *suid bit* set.
+
+The *suid bit* lets other users execute the binary as the owner of the binary. In the case of `sudo` the binary is executed but it checks the user password before it executes the specified command as root.
+
+We can only set the suid bit on binaries - not shell scripts or python files etc. This is because an .sh file actually needs to use bash to execute it so bash is the binary. A python file uses python to execute it so python is the binary.
+
+We can set the suid bit using: `sudo chmod u+s filename` or we can use the *octal* way: `sudo chmod 4000 filename`
+
+### Enumerating SUID Binaries
+
+When we land on a box, we can search for binaries which have the *suid bit* set using: `find / -perm 4000 -type f 2>/dev/null`
+
+We can see if the suid bit is set on a binary by using `ls -l` If the suid bit is set, the execute bit space for the owner will have `s` - this will be lowercase if the execute bit is set as well as the suid bit - it will be S if the suid bit is set but the execute bit is not set.
+
+We can check [gtfobins](https://gtfobins.github.io) for ways to exploit binaries which have the suid bit set. We could create a file which contains suid binaries using: `find / -perm -4000 -type f 2>/dev/null | tr "/" " " | rev | cut -d" " -f1 | sed 's/[0-9]://g' | rev | tee -a suid_bins.txt`
+
+This can be cross-referenced with entries on gtfobins using:
+
+```bash
+for i in $(curl -s https://gtfobins.github.io/ | html2text | cut -d" " -f1 | sed '/^[[:space:]]*$/d');do if grep -q "$i" installed_pkgs.list;then echo "Check GTFO for: $i";fi;done
+```
+
+Sometimes, we might find custom binaries with the suid bit set. If we find these, it is worth our while to explore them to find out how they work and any potential ways to exploit their functionality to elevate our privileges or access resources we should not be able to access.
+
