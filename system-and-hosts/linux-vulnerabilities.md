@@ -146,3 +146,33 @@ Like other services, it is also possible to exploit vulnerabilities in specific 
 
 We can research using search engines or *searchsploit*.
 
+## Exploiting SSH
+
+Secure SHell is a tool used to remotely access machines. Since linux is used on lots of servers and people need to access those servers remotely, SSH is found on lots of linux machines.
+
+>[!TIP]
+>Always port scan all ports - SSH runs by default on port 22 but it is often found running on non-default ports
+
+In order to exploit SSH, we can either attempt to brute-force a login or we can look for specific exploits pertaining to the specific version of SSH which is running. If we go down the route of looking for exploits for the version of SSH which is running we can research using search engines of we can look on *searchsploit*.
+
+>[!NOTE]
+>If we manage to get a session using SSH we will have a fully functional shell
+
+### Authentication
+
+SSH has two methods of authentication. The more secure form is the use of a public and private key which are mathematically related. The public key is kept on the server whilst the private key is kept by the client. If this method of authentication is being used, we will not be able to brute-force login credentials - we would need to somehow get a copy of the private key which is highly unlikely since private keys are kept secret by their owners.
+
+Lots of SSH services are still configured to use username:password authentication, however, so we can attempt a password spraying attack or dictionary brute-force attack sometimes. As for other services such as FTP we can use tools such as patator or hydra.
+
+```bash
+sudo hydra -L users.txt -P passes.txt ssh://10.10.187.241:22 -t 4
+```
+
+The better method which is a *password spraying* attack can be run using:
+
+```bash
+sudo hydra -L users.txt -p Password1 ssh://10.10.187.241:22 -t 4
+```
+
+>[!IMPORTANT]
+>Just like FTP we can crash SSH if we run *hydra* with the default 16 threads - this is why we use `-t 4` to slow the attack down
